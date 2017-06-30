@@ -1,9 +1,0 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Interprit.Azure.LogicApps.Connectors.BlobConnector.Properties" GeneratedClassName="Settings">
-  <Profiles />
-  <Settings>
-    <Setting Name="InvalidBlobContainerNameMessage" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">InterfaceName must only contain letters, numbers and hyphens, and must begin and end with a letter or number.</Value>
-    </Setting>
-  </Settings>
-</SettingsFile>

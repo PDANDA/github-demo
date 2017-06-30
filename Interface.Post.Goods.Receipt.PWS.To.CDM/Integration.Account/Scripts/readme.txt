@@ -1,1 +1,0 @@
-.\Scripts\Deploy.IntegrationAccount.ps1 -RGName "Integration-Common" -IAName "IA-Common" -Environment "DEV" -CommonEnvironment "DEV" -WorkingDirectory "."
