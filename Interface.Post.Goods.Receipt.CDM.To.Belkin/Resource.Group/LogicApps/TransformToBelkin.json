@@ -1,0 +1,419 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "type": "string",
+      "defaultValue": "DEV"
+    },
+    "commonEnvironment": {
+      "type": "string",
+      "defaultValue": "DEV"
+    },
+    "logicAppName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    },
+    "logicAppLocation": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "allowedValues": [
+        "eastasia",
+        "southeastasia",
+        "centralus",
+        "eastus",
+        "eastus2",
+        "westus",
+        "northcentralus",
+        "southcentralus",
+        "northeurope",
+        "westeurope",
+        "japanwest",
+        "japaneast",
+        "brazilsouth",
+        "australiaeast",
+        "australiasoutheast",
+        "southindia",
+        "centralindia",
+        "westindia",
+        "canadacentral",
+        "canadaeast",
+        "westcentralus",
+        "westus2",
+        "[resourceGroup().location]"
+      ],
+      "metadata": {
+        "description": "Location of the Logic App."
+      }
+    },
+    "servicebusConnectionName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('environment'),'-APIConn-ServiceBus')]"
+    },
+    "servicebusConnectionDisplayName": {
+      "type": "string",
+      "defaultValue": "ServiceBus Connection"
+    },
+    "serviceBusNamespaceName": {
+      "type": "string",
+      "defaultValue": "SB-Common"
+    },
+    "serviceBusSendTopicName": {
+      "type": "string",
+      "defaultValue": "publish-belkinx12xml-outgoing"
+    },
+    "integrationAccountName": {
+      "type": "string",
+      "defaultValue": "IA-Common"
+    },
+    "commonResourceGroupName": {
+      "type": "string",
+      "defaultValue": "Integration-Common"
+    },
+    "apiBlobConnectorAppName": {
+      "type": "string",
+      "defaultValue": "AS-PostGoodsReceipt-CDMToBelkin-Blob"
+    },
+    "apiReportingConnectorAppName": {
+      "type": "string",
+      "defaultValue": "AS-Report"
+    },
+    "eventHubName": {
+      "type": "string",
+      "defaultValue": "eh-common"
+    },
+    "eventHubRuleId": {
+      "type": "string",
+      "defaultValue": "Reporting"
+    },
+    "adAuthAudienceReport": {
+      "type": "string"
+    },
+    "adAuthAuthority": {
+      "type": "string"
+    },
+    "adAuthClientId": {
+      "type": "string"
+    },
+    "adAuthSecret": {
+      "type": "string"
+    },
+    "adAuthTenant": {
+      "type": "string"
+    },
+    "adAuthAudienceBlob": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "logicAppName": "[concat(parameters('environment'), '-', parameters('logicAppName'))]",
+    "commonResourceGroupName": "[concat(parameters('commonEnvironment'), '-', parameters('commonResourceGroupName'))]",
+    "integrationAccountName": "[concat(parameters('commonEnvironment'), '-', parameters('integrationAccountName'))]",
+    "integrationAccountId": "[resourceId(concat(parameters('commonEnvironment'), '-',parameters('commonResourceGroupName')), 'Microsoft.Logic/integrationAccounts', concat(parameters('commonEnvironment'), '-',parameters('integrationAccountName')))]",
+    "serviceBusNamespaceName": "[concat(parameters('environment'), '-', parameters('serviceBusNamespaceName'))]",
+    "serviceBusNamespaceauthRuleResourceId": "[resourceId(concat(parameters('commonEnvironment'), '-', parameters('commonResourceGroupName')),'Microsoft.ServiceBus/namespaces/authorizationRules', concat(parameters('environment'), '-',parameters('serviceBusNamespaceName')), 'RootManageSharedAccessKey')]",
+    "reportUri": "[concat('https://', parameters('environment'), '-', parameters('apiReportingConnectorAppName'), '.azurewebsites.net')]",
+    "blobUri": "[concat('https://', parameters('environment'), '-', parameters('apiBlobConnectorAppName'), '.azurewebsites.net')]",
+    "transformMapName": "[concat(parameters('environment'), '-CDM.PostGoodsReceipt-To-Belkin.X12.00401.944')]",
+    "eventHubName": "[concat(parameters('environment'), '-', parameters('eventHubName'))]",
+    "eventHubResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('commonResourceGroupName'), '/providers/Microsoft.EventHub/namespaces/', variables('eventHubName'))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('logicAppName')]",
+      "type": "Microsoft.Logic/workflows",
+      "location": "[parameters('logicAppLocation')]",
+      "apiVersion": "2016-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', parameters('servicebusConnectionName'))]"
+      ],
+      "tags": {
+        "displayName": "logicApp"
+      },
+      "properties": {
+        "integrationAccount": {
+          "id": "[variables('integrationAccountId')]"
+        },
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "actions": {
+            "DocProps": {
+              "type": "Compose",
+              "inputs": "@triggerBody()?['Properties']",
+              "runAfter": {}
+            },
+            "Construct_Event_Message": {
+              "type": "Compose",
+              "inputs": {
+                "Id": "@guid()",
+                "Type": "messagebox"
+              },
+              "runAfter": {
+                "DocProps": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Transform_XML": {
+              "type": "Xslt",
+              "inputs": {
+                "content": "@{base64ToString(triggerBody()?['ContentData'])}",
+                "integrationAccount": {
+                  "map": {
+                    "name": "[variables('transformMapName')]"
+                  }
+                }
+              },
+              "runAfter": {
+                "Construct_Event_Message": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "MessageBox": {
+              "type": "Http",
+              "inputs": {
+                "method": "post",
+                "uri": "[concat(variables('blobUri'), '/api/blob')]",
+                "body": {
+                  "BlobName": "@{concat(parameters('topics')['servicebus']['sendTopicName'], '/', outputs('Construct_Event_Message')['Id'])}",
+                  "ContainerName": "messagebox",
+                  "Base64MessageBody": "@{base64(body('Transform_XML'))}",
+                  "Properties": {
+                    "From": "PWS",
+                    "To": "Belkin",
+                    "AS2From": "@{outputs('DocProps')['AS2From']}",
+                    "AS2To": "@{outputs('DocProps')['AS2To']}",
+                    "X12From": "",
+                    "X12To": "",
+                    "ReceiverPartnerName": "",
+                    "SenderPartnerName": "",
+                    "Agreement": "",
+                    "DocumentType": "",
+                    "DocumentSubType": "@{outputs('DocProps')['DocSubType']}",
+                    "EntityVersion": "",
+                    "InterchangeControlNumber": "",
+                    "ServiceBusTriggerContent": "@{base64(outputs('Construct_Event_Message'))}",
+                    "CorrelationId": "@{outputs('Construct_Event_Message')['Id']}",
+                    "Interface": "PostGoodsReceipt",
+                    "MessageType": "",
+                    "ReceivedDateTime": "@utcnow()",
+                    "Status": "Transform",
+                    "TestIndicator": "",
+                    "Q2QTestIndicator": "false",
+                    "WorkflowGuid": "@string(workflow()['run']['name'])",
+                    "WorkflowName": "@{workflow()?['name']}",
+                    "GLNCode": "@{outputs('DocProps')['GLNCode']}",
+                    "CustomerName": "",
+                    "WarehouseLocationCode": "",
+                    "AssociatedServiceBusTopicName": "[parameters('serviceBusSendTopicName')]",
+                    "CustomerMessageId": "@{outputs('DocProps')['CustShipOrderNo']}"
+                  }
+                },
+                "authentication": {
+                  "audience": "[parameters('adAuthAudienceBlob')]",
+                  "authority": "[parameters('adAuthAuthority')]",
+                  "clientId": "[parameters('adAuthClientId')]",
+                  "secret": "[parameters('adAuthSecret')]",
+                  "tenant": "[parameters('adAuthTenant')]",
+                  "type": "ActiveDirectoryOAuth"
+                }
+              },
+              "runAfter": {
+                "Transform_XML": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Send_Trigger_Message": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "api": {
+                    "runtimeUrl": "https://logic-apis-australiasoutheast.azure-apim.net/apim/servicebus"
+                  },
+                  "connection": {
+                    "name": "@parameters('$connections')['servicebus']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/@{encodeURIComponent(parameters('topics')['servicebus']['sendTopicName'])}/messages",
+                "body": {
+                  "ContentData": "@{base64(outputs('Construct_Event_Message'))}",
+                  "ContentType": "application/json",
+                  "CorrelationId": "@{outputs('Construct_Event_Message')['Id']}"
+                }
+              },
+              "runAfter": {
+                "MessageBox": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Log_Event": {
+              "type": "Http",
+              "inputs": {
+                "method": "POST",
+                "uri": "[concat(variables('reportUri'), '/api/Event')]",
+                "body": {
+                  "Component": "@{workflow()?['name']}",
+                  "EventType": "Transform",
+                  "Interface": "@{outputs('DocProps')['Interface']}",
+                  "MessageID": "@{outputs('DocProps')['WorkflowGuid']}"
+                },
+                "authentication": {
+                  "audience": "[parameters('adAuthAudienceReport')]",
+                  "authority": "[parameters('adAuthAuthority')]",
+                  "clientId": "[parameters('adAuthClientId')]",
+                  "secret": "[parameters('adAuthSecret')]",
+                  "tenant": "[parameters('adAuthTenant')]",
+                  "type": "ActiveDirectoryOAuth"
+                }
+              },
+              "runAfter": {
+                "Send_Trigger_Message": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Complete_the_message_in_a_topic_subscription": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "api": {
+                    "runtimeUrl": "https://logic-apis-australiasoutheast.azure-apim.net/apim/servicebus"
+                  },
+                  "connection": {
+                    "name": "@parameters('$connections')['servicebus']['connectionId']"
+                  }
+                },
+                "method": "delete",
+                "path": "/@{encodeURIComponent('publish-postgoodsreceipt-cdm')}/subscriptions/@{encodeURIComponent('belkin')}/messages/complete",
+                "queries": {
+                  "lockToken": "@{triggerBody()?['LockToken']}",
+                  "subscriptionType": "Main"
+                }
+              },
+              "runAfter": {
+                "Log_Event": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            },
+            "topics": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "When_a_message_is_received_in_a_topic_subscription_(peek-lock)": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "api": {
+                    "runtimeUrl": "https://logic-apis-australiasoutheast.azure-apim.net/apim/servicebus"
+                  },
+                  "connection": {
+                    "name": "@parameters('$connections')['servicebus']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/@{encodeURIComponent('publish-postgoodsreceipt-cdm')}/subscriptions/@{encodeURIComponent('belkin')}/messages/head/peek",
+                "queries": {
+                  "subscriptionType": "Main"
+                }
+              },
+              "recurrence": {
+                "frequency": "Minute",
+                "interval": 3
+              }
+            }
+          },
+          "contentVersion": "1.0.0.0",
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "servicebus": {
+                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', parameters('logicAppLocation'), '/managedApis/', 'servicebus')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('servicebusConnectionName'))]",
+                "connectionName": "[parameters('servicebusConnectionName')]"
+              }
+            }
+          },
+          "topics": {
+            "value": {
+              "servicebus": {
+                "sendTopicName": "[parameters('serviceBusSendTopicName')]"
+              }
+            }
+          }
+        }
+      },
+      "resources": [
+        {
+          "type": "providers/diagnosticSettings",
+          "name": "Microsoft.Insights/service",
+          "dependsOn": [
+            "[resourceId('Microsoft.Logic/workflows', variables('logicAppName'))]"
+          ],
+          "apiVersion": "2015-07-01",
+          "properties": {
+            "serviceBusResourceId": "[variables('eventHubResourceId')]",
+            "serviceBusRuleId": "[concat(variables('eventHubResourceId'), '/authorizationrules/', parameters('eventHubRuleId'))]",
+            "logs": [
+              {
+                "category": "WorkflowRuntime",
+                "enabled": true,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              }
+            ],
+            "metrics": [
+              {
+                "timeGrain": "PT1M",
+                "enabled": true,
+                "retentionPolicy": {
+                  "enabled": true,
+                  "days": 1
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('servicebusConnectionName')]",
+      "tags": {
+        "displayName": "servicebusConnection"
+      },
+      "location": "[parameters('logicAppLocation')]",
+      "properties": {
+        "api": {
+          "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', parameters('logicAppLocation'), '/managedApis/', 'servicebus')]"
+        },
+        "displayName": "[parameters('servicebusConnectionDisplayName')]",
+        "parameterValues": {
+          "connectionString": "[listkeys(variables('serviceBusNamespaceauthRuleResourceId'), '2015-08-01').primaryConnectionString]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

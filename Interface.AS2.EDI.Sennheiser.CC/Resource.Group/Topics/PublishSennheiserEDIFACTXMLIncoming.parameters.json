@@ -1,0 +1,48 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "DEV"
+    },
+    "serviceBusNamespaceName": {
+      "value": "SB-Common"
+    },
+    "topicName": {
+      "value": "publish-sennheiseredifactxml-incoming"
+    },
+    "topicDisplayName": {
+      "value": "Publish Sennheiser EDIFACT XML Incoming"
+    },
+    "asnSubscriptionName": {
+      "value": "Receive_ORDERS_ASN"
+    },
+    "asnSubscriptionDisplayName": {
+      "value": "Receive ORDERS ASN"
+    },
+    "rmaSubscriptionName": {
+      "value": "Receive_ORDRSP_RMA"
+    },
+    "rmaSubscriptionDisplayName": {
+      "value": "Receive ORDRSP RMA"
+    },
+    "wsoSubscriptionName": {
+      "value": "Receive_ORDRSP_WSO"
+    },
+    "wsoSubscriptionDisplayName": {
+      "value": "Receive ORDRSP WSO"
+    },
+    "pmSubscriptionName": {
+      "value": "Receive_PRICAT_PM"
+    },
+    "pmSubscriptionDisplayName": {
+      "value": "Receive PRICAT Product Master"
+    },
+    "testSubscriptionName": {
+      "value": "test"
+    },
+    "testSubscriptionDisplayName": {
+      "value": "Test"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "DEV"
+    },
+    "commonEnvironment": {
+      "value": "DEV"
+    },
+    "storageAccountName": {
+      "value": "lfx[env]integrationstorage"
+    },
+    "servicePlanName": {
+      "value": "SP-Common"
+    },
+    "commonResourceGroupName": {
+      "value": "Integration-Common"
+    },
+    "apiBlobConnectorAppName": {
+      "value": "AS-AS2-EDI-Sennheiser-Blob"
+    },
+    "serviceBusNamespaceName": {
+      "value": "SB-Common"
+    },
+    "functionAppName": {
+      "value": "FA-AS2-EDI-Sennheiser"
+    },
+    "decodeEdifactLogicAppName": {
+      "value": "LA-Decode-Sennheiser-Edifact"
+    },
+    "encodeEdifactLogicAppName": {
+      "value": "LA-Encode-Sennheiser-Edifact"
+    },
+    "sendAS2LogicAppName": {
+      "value": "LA-Send-SennheiserAS2"
+    },
+    "adAuthClientId": {
+      "value": "882793f3-fd11-4af2-ba16-d91e2fd6bf4e"
+    },
+    "adAuthIssuer": {
+      "value": "https://sts.windows.net"
+    },
+    "adAuthTenant": {
+      "value": "80d7985a-dad6-4b89-b6e0-73e3b7104e78"
+    }
+  }
+}

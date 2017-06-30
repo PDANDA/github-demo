@@ -1,0 +1,32 @@
+{
+    "type": "providers/diagnosticSettings",
+    "name": "Microsoft.Insights/service",
+    "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('logicAppName'))]"
+    ],
+    "apiVersion": "2015-07-01",
+    "properties": {
+        "serviceBusResourceId": "[variables('eventHubResourceId')]",
+        "serviceBusRuleId": "[concat(variables('eventHubResourceId'), '/authorizationrules/', parameters('eventHubRuleId'))]",
+        "logs": [
+            {
+                "category": "WorkflowRuntime",
+                "enabled": true,
+                "retentionPolicy": {
+                    "days": 0,
+                    "enabled": false
+                }
+            }
+        ],
+        "metrics": [
+            {
+                "timeGrain": "PT1M",
+                "enabled": true,
+                "retentionPolicy": {
+                    "enabled": true,
+                    "days": 1
+                }
+            }
+        ]
+    }
+}

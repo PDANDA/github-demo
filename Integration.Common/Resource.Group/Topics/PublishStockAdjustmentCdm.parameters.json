@@ -1,0 +1,42 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "SIT"
+    },
+    "serviceBusNamespaceName": {
+      "value": "sb-common"
+    },
+    "topicName": {
+      "value": "publish-stockadjustment-cdm"
+    },
+    "topicDisplayName": {
+      "value": "Publish Stock Adjustment CDM"
+    },
+    "belkinSubscriptionName": {
+      "value": "belkin"
+    },
+    "belkinSubscriptionDisplayName": {
+      "value": "Belkin"
+    },
+    "sennheiserSubscriptionName": {
+      "value": "sennheiser"
+    },
+    "sennheiserSubscriptionDisplayName": {
+      "value": "Sennheiser"
+    },
+    "testSubscriptionName": {
+      "value": "test"
+    },
+    "testSubscriptionDisplayName": {
+      "value": "Test"
+    },
+    "belkinGLNCode": {
+      "value": "'3106042055'"
+    },
+    "sennheiserGLNCode": {
+      "value": "'9400343000001'"
+    }
+  }
+}

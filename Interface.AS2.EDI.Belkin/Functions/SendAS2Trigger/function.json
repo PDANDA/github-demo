@@ -1,0 +1,29 @@
+﻿{
+  "disabled": false,
+  "bindings":
+  [
+    {
+      "name": "trigger",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "topicName": "publish-belkinx12-outgoing",
+      "subscriptionName": "publish",
+      "connection": "ServiceBusConnStr",
+      "accessRights": "Manage"
+    },
+    {
+      "type": "blob",
+      "name": "newBlob",
+      "path": "{Type}/publish-belkinx12-outgoing/{Id}",
+      "connection": "StorageConnStr",
+      "direction": "in"
+    },
+    {
+      "type": "blob",
+      "name": "consumedBlob",
+      "path": "{Type}/publish-belkinx12-outgoing/{Id}",
+      "connection": "StorageConnStr",
+      "direction": "inout"
+    }
+  ]
+}

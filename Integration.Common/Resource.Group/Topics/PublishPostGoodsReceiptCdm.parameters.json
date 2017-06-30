@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "UAT"
+    },
+    "serviceBusNamespaceName": {
+      "value": "sb-common"
+    },
+    "topicName": {
+      "value": "publish-postgoodsreceipt-cdm"
+    },
+    "topicDisplayName": {
+      "value": "Publish Post Goods Receipt CDM"
+    },
+    "belkinSubscriptionName":
+    {
+      "value": "belkin"
+    },
+    "belkinSubscriptionDisplayName":
+    {
+      "value": "Belkin"
+    },
+    "sennheiserSubscriptionName":
+    {
+      "value": "sennheiser"
+    },
+    "sennheiserSubscriptionDisplayName":
+    {
+      "value": "Sennheiser"
+    },
+    "testSubscriptionName": {
+      "value": "test"
+    },
+    "testSubscriptionDisplayName": {
+      "value": "Test"
+    }
+  }
+}

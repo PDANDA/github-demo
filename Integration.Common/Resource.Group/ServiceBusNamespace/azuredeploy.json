@@ -1,0 +1,111 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters":
+  {
+    "environment":
+    {
+      "type": "string"
+    },
+    "serviceBusNamespaceName":
+    {
+      "type": "string"
+    },
+    "servicebusTier":
+    {
+      "type": "string"
+    },
+    "primaryKey":
+    {
+      "type": "string"
+    },
+    "secondaryKey":
+    {
+      "type": "string"
+    }
+  },
+  "variables":
+  {
+    //"serviceBusNamespaceName": "[concat(parameters('environment'), '-', parameters('serviceBusNamespaceName'))]",
+    "serviceBusNamespaceName": "[parameters('serviceBusNamespaceName')]",
+    "serviceBusNamespaceAuthRuleName": "[concat(variables('serviceBusNamespaceName'),'/RootManageSharedAccessKey')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ServiceBus/namespaces",
+      "sku":
+      {
+        "name": "[parameters('servicebusTier')]",
+        "tier": "[parameters('servicebusTier')]"
+      },
+      "kind": "Messaging",
+      "name": "[variables('serviceBusNamespaceName')]",
+      "apiVersion": "2015-08-01",
+      //"location": "[resourceGroup().location]",
+      "location": "eastasia",
+      "tags":
+      {
+        "displayName": "serviceBusNamespace"
+      },
+      "properties":
+      {
+      },
+      "resources":
+      [
+        {
+          "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+          "name": "[variables('serviceBusNamespaceAuthRuleName')]",
+          "tags":
+          {
+            "displayName": "serviceBusNamespaceAuthRule"
+          },
+          "apiVersion": "2015-08-01",
+          "properties":
+          {
+            "rights":
+            [
+              "Listen",
+              "Manage",
+              "Send"
+            ]
+          },
+          "resources":
+          [
+          ],
+          "dependsOn":
+          [
+            "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
+          ]
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "LogicAppsSharedAccessAuthRule",
+          "type": "AuthorizationRules",
+          "dependsOn":
+          [
+            "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
+          ],
+          "properties":
+          {
+            "keyName": "LogicAppsKey",
+            "claimType": "SharedAccessKey",
+            "claimValue": "None",
+            "primaryKey": "[parameters('primaryKey')]",
+            "secondaryKey": "[parameters('secondaryKey')]",
+            "rights":
+            [
+              "Listen",
+              "Send"
+            ],
+            "revision": -1
+          }
+        }
+      ],
+      "dependsOn":
+      [
+      ]
+    }
+
+  ],
+  "outputs": {}
+}

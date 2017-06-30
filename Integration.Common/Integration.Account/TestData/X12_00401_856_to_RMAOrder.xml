@@ -1,0 +1,38 @@
+<n1:RMAOrder xmlns:n1="http://linfox.com/Horizons/RMAOrder/V1" xmlns:s0="http://schemas.microsoft.com/BizTalk/EDI/X12/2006">
+  <n1:MessageHeader>
+    <n1:ID>000000015</n1:ID>
+    <n1:CreationDate>2016-12-25T12:00:00</n1:CreationDate>
+    <n1:GLNCode>3106042055</n1:GLNCode>
+    <n1:WarehouseLocationCode>AU</n1:WarehouseLocationCode>
+    <n1:TestIndicator>T</n1:TestIndicator>
+  </n1:MessageHeader>
+  <n1:RMAHeaderDetails>
+    <n1:RMANumber>SIT_RMA01</n1:RMANumber>
+    <n1:RMAType>RR</n1:RMAType>
+    <n1:ReasonFrRtn>String</n1:ReasonFrRtn>
+    <n1:AddnRefNumber2>00</n1:AddnRefNumber2>
+    <n1:CreationDate>2016-12-25T12:00:00</n1:CreationDate>
+    <n1:CustomerCode>70866</n1:CustomerCode>
+    <n1:CustomerName>JB HI FI HEAD OFFICE</n1:CustomerName>
+	<n1:ArrivalDate>2016-12-25T12:00:00</n1:ArrivalDate>
+    <n1:DeliveryDetails>
+      <n1:StreetName1>String</n1:StreetName1>
+      <n1:CityName>String</n1:CityName>
+      <n1:RegionCode>String</n1:RegionCode>
+      <n1:PostCode>String</n1:PostCode>
+      <n1:CountryCode>String</n1:CountryCode>
+    </n1:DeliveryDetails>
+  </n1:RMAHeaderDetails>
+  <n1:RMAItemDetails>
+    <n1:RMALineItem>
+      <n1:RMALineItemNo>1</n1:RMALineItemNo>
+      <n1:AddnRefNumber1>1</n1:AddnRefNumber1>
+      <n1:AddnRefNumber2>75752690</n1:AddnRefNumber2>
+      <n1:SOReferenceNumber>String</n1:SOReferenceNumber>
+      <n1:SOLineItemReferenceNumber>String</n1:SOLineItemReferenceNumber>
+      <n1:MaterialCode>F3A172au2M</n1:MaterialCode>
+      <n1:Quantity>2</n1:Quantity>
+      <n1:UnitOfMeasure>EA</n1:UnitOfMeasure>
+    </n1:RMALineItem>
+  </n1:RMAItemDetails>
+</n1:RMAOrder>

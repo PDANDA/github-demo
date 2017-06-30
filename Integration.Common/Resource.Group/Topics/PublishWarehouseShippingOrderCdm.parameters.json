@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "UAT"
+    },
+    "serviceBusNamespaceName": {
+      "value": "sb-common"
+    },
+    "topicName": {
+      "value": "publish-warehouseshippingorder-cdm"
+    },
+    "topicDisplayName": {
+      "value": "Publish Warehouse Shipping Order CDM"
+    },
+    "publishSubscriptionName": {
+      "value": "publish"
+    },
+    "publishSubscriptionDisplayName": {
+      "value": "Publish"
+    },
+    "testSubscriptionName": {
+      "value": "test"
+    },
+    "testSubscriptionDisplayName": {
+      "value": "Test"
+    }
+  }
+}

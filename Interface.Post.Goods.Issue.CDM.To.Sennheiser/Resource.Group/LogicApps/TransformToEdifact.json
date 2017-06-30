@@ -1,0 +1,591 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "type": "string",
+      "defaultValue": "DEV"
+    },
+    "commonEnvironment": {
+      "type": "string",
+      "defaultValue": "DEV"
+    },
+    "logicAppName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    },
+    "logicAppLocation": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "allowedValues": [
+        "eastasia",
+        "southeastasia",
+        "centralus",
+        "eastus",
+        "eastus2",
+        "westus",
+        "northcentralus",
+        "southcentralus",
+        "northeurope",
+        "westeurope",
+        "japanwest",
+        "japaneast",
+        "brazilsouth",
+        "australiaeast",
+        "australiasoutheast",
+        "southindia",
+        "centralindia",
+        "westindia",
+        "canadacentral",
+        "canadaeast",
+        "westcentralus",
+        "westus2",
+        "[resourceGroup().location]"
+      ],
+      "metadata": {
+        "description": "Location of the Logic App."
+      }
+    },
+    "servicebusConnectionName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('environment'),'-APIConn-ServiceBus')]"
+    },
+    "servicebusConnectionDisplayName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('environment'),' ServiceBus Connection')]"
+    },
+    "serviceBusNamespaceName": {
+      "type": "string",
+      "defaultValue": "SB-Common"
+    },
+    "commonResourceGroupName": {
+      "type": "string",
+      "defaultValue": "Integration-Common"
+    },
+    "integrationAccountName": {
+      "type": "string",
+      "defaultValue": "IA-Common"
+    },
+    "apiBlobConnectorAppName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('environment'),'-AS-PostGoodsIssue-CDMToBelkin-Archive')]"
+    },
+    "apiReportingConnectorAppName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('environment'),'-AS-PostGoodsIssue-CDMToBelkin-Report')]"
+    },
+    "eventHubName": {
+      "type": "string",
+      "defaultValue": "eh-common"
+    },
+    "eventHubRuleId": {
+      "type": "string",
+      "defaultValue": "Reporting"
+    },
+    "adAuthAudienceReport": {
+      "type": "string"
+    },
+    "adAuthAuthority": {
+      "type": "string"
+    },
+    "adAuthClientId": {
+      "type": "string"
+    },
+    "adAuthSecret": {
+      "type": "string"
+    },
+    "adAuthTenant": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "logicAppName": "[concat(parameters('environment'), '-', parameters('logicAppName'))]",
+    "commonResourceGroupName": "[concat(parameters('commonEnvironment'), '-', parameters('commonResourceGroupName'))]",
+    "integrationAccountName": "[concat(parameters('commonEnvironment'), '-', parameters('integrationAccountName'))]",
+    "integrationAccountId": "[resourceId(variables('commonResourceGroupName'), 'Microsoft.Logic/integrationAccounts', variables('integrationAccountName'))]",
+    "serviceBusNamespaceName": "[concat(parameters('environment'), '-', parameters('serviceBusNamespaceName'))]",
+    "serviceBusNamespaceauthRuleResourceId": "[resourceId(variables('commonResourceGroupName'),'Microsoft.ServiceBus/namespaces/authorizationRules', variables('serviceBusNamespaceName'), 'RootManageSharedAccessKey')]",
+    "apiBlobConnectorAppName": "[concat(parameters('environment'),'-', parameters('apiBlobConnectorAppName'))]",
+    "apiReportingConnectorAppName": "[concat(parameters('environment'),'-', parameters('apiReportingConnectorAppName'))]",
+    "archiveAndReportingUri": "[concat('https://', variables('apiReportingConnectorAppName'), '.azurewebsites.net')]",
+    "blobStorageUri": "[concat('https://', variables('apiBlobConnectorAppName'), '.azurewebsites.net')]",
+    "transformMapName": "[concat(parameters('environment'), '-CDM.PostGoodsIssue_To_Sennheiser.EFACT_D96A_DESADV')]",
+    "eventHubName": "[concat(parameters('environment'), '-', parameters('eventHubName'))]",
+    "eventHubResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('commonResourceGroupName'), '/providers/Microsoft.EventHub/namespaces/', variables('eventHubName'))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('logicAppName')]",
+      "type": "Microsoft.Logic/workflows",
+      "location": "[parameters('logicAppLocation')]",
+      "apiVersion": "2016-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', parameters('servicebusConnectionName'))]"
+      ],
+      "tags": {
+        "displayName": "logicApp"
+      },
+      "properties": {
+        "integrationAccount": {
+          "id": "[variables('integrationAccountId')]"
+        },
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "actions": {
+            "DocProps": {
+              "type": "Compose",
+              "inputs": "@triggerBody()?['Properties']",
+              "runAfter": {}
+            },
+            "Parse_JSON": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@outputs('DocProps')",
+                "schema": {
+                  "properties": {
+                    "ArchivePath": {
+                      "type": "string"
+                    },
+                    "ConNoteNumber": {
+                      "type": "string"
+                    },
+                    "CustShipOrderNo": {
+                      "type": "string"
+                    },
+                    "CustomerName": {
+                      "type": "string"
+                    },
+                    "GLNCode": {
+                      "type": "string"
+                    },
+                    "Interface": {
+                      "type": "string"
+                    },
+                    "LfxShipOrderNo": {
+                      "type": "string"
+                    },
+                    "POOrderNo": {
+                      "type": "string"
+                    },
+                    "SalesOrderNo": {
+                      "type": "string"
+                    },
+                    "WarehouseCode": {
+                      "type": "string"
+                    },
+                    "WorkflowGuid": {
+                      "type": "string"
+                    },
+                    "WorkflowName": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "runAfter": {
+                "DocProps": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Transform_XML": {
+              "type": "Xslt",
+              "inputs": {
+                "content": "@{base64ToString(triggerBody()?['Base64MessageBody'])}",
+                "integrationAccount": {
+                  "map": {
+                    "name": "[variables('transformMapName')]"
+                  }
+                }
+              },
+              "runAfter": {
+                "Parse_JSON": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Send_message": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "api": {
+                    "runtimeUrl": "https://logic-apis-australiasoutheast.azure-apim.net/apim/servicebus"
+                  },
+                  "connection": {
+                    "name": "@parameters('$connections')['servicebus']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/@{encodeURIComponent('publish-sennheiseredifactxml-outgoing')}/messages",
+                "body": {
+                  "ContentData": "@{base64(body('Transform_XML'))}",
+                  "ContentType": "application/xml",
+                  "Properties": "@outputs('DocProps')",
+                  "CorrelationId": "@{triggerBody()?['CorrelationId']}"
+                }
+              },
+              "runAfter": {
+                "Transform_XML": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Log_to_Reporting": {
+              "type": "Http",
+              "inputs": {
+                "method": "post",
+                "uri": "[concat(variables('archiveAndReportingUri'), '/api/Event')]",
+                "body": {
+                  "ArchivePath": "@{body('Parse_JSON')?['ArchivePath']}",
+                  "Component": "@workflow().name",
+                  "CustomProperties": {
+                    "CustomerName": "Sennheiser",
+                    "CustomerPONo": "@{body('Parse_JSON')?['POOrderNo']}",
+                    "GLN": "@{body('Parse_JSON')?['GLNCode']}",
+                    "ShipmentOrderNo": "@{body('Parse_JSON')?['LfxShipOrderNo']}",
+                    "WareHouseCode": "@{body('Parse_JSON')?['WarehouseCode']}"
+                  },
+                  "EventType": "Transform",
+                  "Interface": "@{body('Parse_JSON')?['Interface']}",
+                  "MessageID": "@{body('Parse_JSON')?['WorkflowGuid']}"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "authority": "[parameters('adAuthAuthority')]",
+                  "tenant": "[parameters('adAuthTenant')]",
+                  "audience": "[parameters('adAuthAudienceReport')]",
+                  "clientId": "[parameters('adAuthClientId')]",
+                  "secret": "[parameters('adAuthSecret')]"
+                },
+                "metadata": {
+                  "apiDefinitionUrl": "[concat(variables('archiveAndReportingUri'), '/swagger/docs/v1')]",
+                  "swaggerSource": "website"
+                }
+              },
+              "runAfter": {
+                "Send_message": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "id": "http://integration.linfox.com/root.json",
+                  "properties": {
+                    "Base64MessageBody": {
+                      "default": "",
+                      "description": "The message body encoded as Base64.",
+                      "id": "http://integration.linfox.com/root.json/Base64MessageBody",
+                      "title": "Base64 Message Body",
+                      "type": "string"
+                    },
+                    "BlobName": {
+                      "default": "",
+                      "description": "The name of the blob the archive was last saved to.",
+                      "id": "http://integration.linfox.com/root.json/BlobName",
+                      "title": "Blob Name",
+                      "type": "string"
+                    },
+                    "ContainerName": {
+                      "default": "archive",
+                      "description": "The container name of the storage account used for blob storage.",
+                      "id": "http://integration.linfox.com/root.json/ContainerName",
+                      "title": "Container Name",
+                      "type": "string"
+                    },
+                    "Properties": {
+                      "id": "http://integration.linfox.com/root.json/Properties",
+                      "properties": {
+                        "ArchivePath": {
+                          "default": "",
+                          "description": "The AS2 or EDI agreement name.",
+                          "id": "http://integration.linfox.com/root.json/Properties/Agreement",
+                          "title": "ArchivePath",
+                          "type": "string"
+                        },
+                        "AS2From": {
+                          "default": "",
+                          "description": "The AS2 From parameter of the AS2 message.",
+                          "id": "http://integration.linfox.com/root.json/Properties/AS2From",
+                          "title": "AS2 From",
+                          "type": "string"
+                        },
+                        "AS2To": {
+                          "default": "",
+                          "description": "The AS2 To parameter of the AS2 message.",
+                          "id": "http://integration.linfox.com/root.json/Properties/AS2To",
+                          "title": "AS2 To",
+                          "type": "string"
+                        },
+                        "AssociatedServiceBusTopicName": {
+                          "default": "",
+                          "description": "Associated Service Bus Topic name.",
+                          "id": "http://integration.linfox.com/root.json/Properties/AssociatedServiceBusTopicName",
+                          "title": "Associated Service Bus Topic Name",
+                          "type": "string"
+                        },
+                        "CorrelationId": {
+                          "default": "",
+                          "description": "A unique id used for correlation throughout the interface.",
+                          "id": "http://integration.linfox.com/root.json/Properties/CorrelationId",
+                          "title": "Correlation Id",
+                          "type": "string"
+                        },
+                        "CustomerMessageId": {
+                          "default": "",
+                          "description": "Customer message id.",
+                          "id": "http://integration.linfox.com/root.json/Properties/CustomerMessageId",
+                          "title": "Customer Message Id",
+                          "type": "string"
+                        },
+                        "CustomerName": {
+                          "default": "",
+                          "description": "Customer Name.",
+                          "id": "http://integration.linfox.com/root.json/Properties/CustomerName",
+                          "title": "Customer Name",
+                          "type": "string"
+                        },
+                        "DocumentSubType": {
+                          "default": "",
+                          "description": "The sub-type of the message document.",
+                          "id": "http://integration.linfox.com/root.json/Properties/DocumentSubType",
+                          "title": "Document Sub-Type",
+                          "type": "string"
+                        },
+                        "DocumentType": {
+                          "default": "",
+                          "description": "The type of the message document.",
+                          "id": "http://integration.linfox.com/root.json/Properties/DocumentType",
+                          "title": "Document Type",
+                          "type": "string"
+                        },
+                        "EntityVersion": {
+                          "default": "1.0",
+                          "description": "The version of the message entity.",
+                          "id": "http://integration.linfox.com/root.json/Properties/EntityVersion",
+                          "title": "Entity Version",
+                          "type": "string"
+                        },
+                        "From": {
+                          "default": "",
+                          "description": "Generic From parameter.",
+                          "id": "http://integration.linfox.com/root.json/Properties/From",
+                          "title": "From",
+                          "type": "string"
+                        },
+                        "GLNCode": {
+                          "default": "",
+                          "description": "Customer GLN Code.",
+                          "id": "http://integration.linfox.com/root.json/Properties/GLNCode",
+                          "title": "GLN Code",
+                          "type": "string"
+                        },
+                        "InterchangeControlNumber": {
+                          "default": "",
+                          "description": "EDI interchange control number.",
+                          "id": "http://integration.linfox.com/root.json/Properties/InterchangeControlNumber",
+                          "title": "Interchange Control Number",
+                          "type": "string"
+                        },
+                        "Interface": {
+                          "default": "",
+                          "description": "The name of the interface.",
+                          "id": "http://integration.linfox.com/root.json/Properties/Interface",
+                          "title": "Interface",
+                          "type": "string"
+                        },
+                        "MessageType": {
+                          "default": "",
+                          "description": "The incoming type of the message.",
+                          "id": "http://integration.linfox.com/root.json/Properties/MessageType",
+                          "title": "MessageType",
+                          "type": "string"
+                        },
+                        "Q2QTestIndicator": {
+                          "default": "",
+                          "description": "Boolean indicator as to whether this is a Q2Q test.",
+                          "id": "http://integration.linfox.com/root.json/Properties/Q2QTestIndicator",
+                          "title": "Q2Q Test Indicator",
+                          "type": "string"
+                        },
+                        "ReceivedDateTime": {
+                          "default": "",
+                          "description": "The date and time at which the message was received.",
+                          "id": "http://integration.linfox.com/root.json/Properties/ReceivedDateTime",
+                          "title": "Received Date Time",
+                          "type": "string"
+                        },
+                        "ReceiverPartnerName": {
+                          "default": "",
+                          "description": "AS2 receiver partner name.",
+                          "id": "http://integration.linfox.com/root.json/Properties/ReceiverPartnerName",
+                          "title": "Receiver Partner Name",
+                          "type": "string"
+                        },
+                        "SenderPartnerName": {
+                          "default": "",
+                          "description": "AS2 Sender Partner Name.",
+                          "id": "http://integration.linfox.com/root.json/Properties/SenderPartnerName",
+                          "title": "Sender Partner Name",
+                          "type": "string"
+                        },
+                        "ServiceBusTriggerContent": {
+                          "default": "",
+                          "description": "The service bus trigger content.",
+                          "id": "http://integration.linfox.com/root.json/ServiceBusTriggerContent",
+                          "title": "ServiceBus Trigger Content",
+                          "type": "string"
+                        },
+                        "Status": {
+                          "default": "",
+                          "description": "The status of the message within the interface.",
+                          "id": "http://integration.linfox.com/root.json/Properties/Status",
+                          "title": "Status",
+                          "type": "string"
+                        },
+                        "TestIndicator": {
+                          "default": "",
+                          "description": "EDI test indicator.",
+                          "id": "http://integration.linfox.com/root.json/Properties/TestIndicator",
+                          "title": "Test Indicator",
+                          "type": "string"
+                        },
+                        "To": {
+                          "default": "",
+                          "description": "Generic To parameter.",
+                          "id": "http://integration.linfox.com/root.json/Properties/To",
+                          "title": "To",
+                          "type": "string"
+                        },
+                        "WarehouseLocationCode": {
+                          "default": "",
+                          "description": "Warehouse Location Code.",
+                          "id": "http://integration.linfox.com/root.json/Properties/WarehouseLocationCode",
+                          "title": "Warehouse Location Code",
+                          "type": "string"
+                        },
+                        "WorkflowGuid": {
+                          "default": "",
+                          "description": "GUID of the current Logic App.",
+                          "id": "http://integration.linfox.com/root.json/Properties/WorkflowGuid",
+                          "title": "Workflow GUID",
+                          "type": "string"
+                        },
+                        "WorkflowName": {
+                          "default": "",
+                          "description": "Name of the current Logic App.",
+                          "id": "http://integration.linfox.com/root.json/Properties/WorkflowName",
+                          "title": "Workflow Name",
+                          "type": "string"
+                        },
+                        "X12From": {
+                          "default": "",
+                          "description": "The X12 From parameter of the EDI message.",
+                          "id": "http://integration.linfox.com/root.json/Properties/X12From",
+                          "title": "X12 From.",
+                          "type": "string"
+                        },
+                        "X12To": {
+                          "default": "",
+                          "description": "The X12 To parameter of the EDI message.",
+                          "id": "http://integration.linfox.com/root.json/Properties/X12To",
+                          "title": "X12 To",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "contentVersion": "1.0.0.0",
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "servicebus": {
+                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', parameters('logicAppLocation'), '/managedApis/', 'servicebus')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('servicebusConnectionName'))]",
+                "connectionName": "[parameters('servicebusConnectionName')]"
+              }
+            }
+          }
+        }
+      },
+      "resources": [
+        {
+          "type": "providers/diagnosticSettings",
+          "name": "Microsoft.Insights/service",
+          "dependsOn": [
+            "[resourceId('Microsoft.Logic/workflows', variables('logicAppName'))]"
+          ],
+          "apiVersion": "2015-07-01",
+          "properties": {
+            "serviceBusResourceId": "[variables('eventHubResourceId')]",
+            "serviceBusRuleId": "[concat(variables('eventHubResourceId'), '/authorizationrules/', parameters('eventHubRuleId'))]",
+            "logs": [
+              {
+                "category": "WorkflowRuntime",
+                "enabled": true,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              }
+            ],
+            "metrics": [
+              {
+                "timeGrain": "PT1M",
+                "enabled": true,
+                "retentionPolicy": {
+                  "enabled": true,
+                  "days": 1
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('servicebusConnectionName')]",
+      "tags": {
+        "displayName": "servicebusConnection"
+      },
+      "location": "[parameters('logicAppLocation')]",
+      "properties": {
+        "api": {
+          "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', parameters('logicAppLocation'), '/managedApis/', 'servicebus')]"
+        },
+        "displayName": "[parameters('servicebusConnectionDisplayName')]",
+        "parameterValues": {
+          "connectionString": "[listkeys(variables('serviceBusNamespaceauthRuleResourceId'), '2015-08-01').primaryConnectionString]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

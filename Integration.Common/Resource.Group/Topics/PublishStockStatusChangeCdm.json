@@ -1,0 +1,179 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "type": "string"
+    },
+    "serviceBusNamespaceName": {
+      "type": "string"
+    },
+    "topicName": {
+      "type": "string"
+    },
+    "topicDisplayName": {
+      "type": "string"
+    },
+    "belkinSubscriptionName": {
+      "type": "string"
+    },
+    "belkinSubscriptionDisplayName": {
+      "type": "string"
+    },
+    "belkinGLNCode": {
+      "type": "string"
+    },
+    "sennheiserSubscriptionName": {
+      "type": "string"
+    },
+    "sennheiserSubscriptionDisplayName": {
+      "type": "string"
+    },
+    "sennheiserGLNCode": {
+      "type": "string"
+    },
+    "testSubscriptionName": {
+      "type": "string"
+    },
+    "testSubscriptionDisplayName": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "topicApiVersion": "2015-08-01",
+    "subscriptionApiVersion": "2015-08-01",
+    "serviceBusNamespaceName": "[concat(parameters('environment'), '-', parameters('serviceBusNamespaceName'))]",
+    "topicName": "[concat(variables('serviceBusNamespaceName'),'/', parameters('topicName'))]",
+    "belkinSubscriptionName": "[concat(variables('topicName'), '/', parameters('belkinSubscriptionName'))]",
+    "sennheiserSubscriptionName": "[concat(variables('topicName'), '/', parameters('sennheiserSubscriptionName'))]",
+    "testSubscriptionName": "[concat(variables('topicName'),'/', parameters('testSubscriptionName'))]",
+    "belkinFilterName": "belkinFilter",
+    "sennheiserFilterName": "sennheiserFilter"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "name": "[variables('topicName')]",
+      "tags": {
+        "displayName": "[parameters('topicDisplayName')]"
+      },
+      "apiVersion": "[variables('topicApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "defaultMessageTimeToLive": "14.00:00:00",
+        "maxSizeInMegabytes": 5120,
+        "requiresDuplicateDetection": false,
+        "enablePartitioning": true,
+        "enableBatchedOperations": true,
+        "filteringMessagesBeforePublishing": false,
+        "isAnonymousAccessible": false,
+        "isExpress": false,
+        "enableSubscriptionPartitioning": false,
+        "enableExpress": false
+      },
+      "resources": [
+        {
+          "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+          "name": "[variables('belkinSubscriptionName')]",
+          "tags": {
+            "displayName": "[parameters('belkinSubscriptionDisplayName')]"
+          },
+          "apiVersion": "[variables('subscriptionApiVersion')]",
+          "location": "[resourceGroup().location]",
+          "properties": {
+            "lockDuration": "00:05:00",
+            "requiresSession": false,
+            "defaultMessageTimeToLive": "14.00:00:00",
+            "deadLetteringOnMessageExpiration": false,
+            "deadLetteringOnFilterEvaluationExceptions": false,
+            "messageCount": 0,
+            "maxDeliveryCount": 1,
+            "enableBatchedOperations": false
+          },
+          "resources": [
+            {
+              "apiVersion": "[variables('subscriptionApiVersion')]",
+              "name": "[variables('belkinFilterName')]",
+              "type": "Rules",
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces/topics/subscriptions', variables('serviceBusNamespaceName'), parameters('topicName'), parameters('belkinSubscriptionName'))]"
+              ],
+              "properties": {
+                "filter": {
+                  "sqlExpression": "[concat('GLNCode = ', parameters('belkinGLNCode'))]"
+                },
+                "action": {}
+              }
+            }
+          ],
+          "dependsOn": [
+            "[resourceId('Microsoft.ServiceBus/namespaces/topics', variables('serviceBusNamespaceName'), parameters('topicName'))]"
+          ]
+        },
+        {
+          "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+          "name": "[variables('sennheiserSubscriptionName')]",
+          "tags": {
+            "displayName": "[parameters('sennheiserSubscriptionDisplayName')]"
+          },
+          "apiVersion": "[variables('subscriptionApiVersion')]",
+          "location": "[resourceGroup().location]",
+          "properties": {
+            "lockDuration": "00:05:00",
+            "requiresSession": false,
+            "defaultMessageTimeToLive": "14.00:00:00",
+            "deadLetteringOnMessageExpiration": false,
+            "deadLetteringOnFilterEvaluationExceptions": false,
+            "messageCount": 0,
+            "maxDeliveryCount": 1,
+            "enableBatchedOperations": false
+          },
+          "resources": [
+            {
+              "apiVersion": "[variables('subscriptionApiVersion')]",
+              "name": "[variables('sennheiserFilterName')]",
+              "type": "Rules",
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces/topics/subscriptions', variables('serviceBusNamespaceName'), parameters('topicName'), parameters('sennheiserSubscriptionName'))]"
+              ],
+              "properties": {
+                "filter": {
+                  "sqlExpression": "[concat('GLNCode = ', parameters('sennheiserGLNCode'))]"
+                },
+                "action": {}
+              }
+            }
+          ],
+          "dependsOn": [
+            "[resourceId('Microsoft.ServiceBus/namespaces/topics', variables('serviceBusNamespaceName'), parameters('topicName'))]"
+          ]
+        },
+        {
+          "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+          "name": "[variables('testSubscriptionName')]",
+          "tags": {
+            "displayName": "[parameters('testSubscriptionDisplayName')]"
+          },
+          "apiVersion": "[variables('subscriptionApiVersion')]",
+          "location": "[resourceGroup().location]",
+          "properties": {
+            "lockDuration": "00:05:00",
+            "requiresSession": false,
+            "defaultMessageTimeToLive": "14.00:00:00",
+            "deadLetteringOnMessageExpiration": false,
+            "deadLetteringOnFilterEvaluationExceptions": false,
+            "messageCount": 0,
+            "maxDeliveryCount": 1,
+            "enableBatchedOperations": false
+          },
+          "resources": [],
+          "dependsOn": [
+            "[resourceId('Microsoft.ServiceBus/namespaces/topics', variables('serviceBusNamespaceName'), parameters('topicName'))]"
+          ]
+        }
+      ],
+      "dependsOn": []
+    }
+  ],
+  "outputs": {}
+}

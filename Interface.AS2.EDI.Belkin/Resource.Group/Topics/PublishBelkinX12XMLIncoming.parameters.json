@@ -1,0 +1,55 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters":
+  {
+    "environmentName":
+    {
+      "value": "SIT"
+    },
+    "serviceBusNamespaceName":
+    {
+      "value": "SB-Common"
+    },
+    "topicName":
+    {
+      "value": "publish-belkinx12xml-incoming"
+    },
+    "topicDisplayName":
+    {
+      "value": "Publish Belkin X12 XML Incoming"
+    },
+    "asnSubscriptionName":
+    {
+      "value": "Receive_856_ASN"
+    },
+    "asnSubscriptionDisplayName":
+    {
+      "value": "Receive 856 ASN"
+    },
+    "rmaSubscriptionName":
+    {
+      "value": "Receive_856_RMA"
+    },
+    "rmaSubscriptionDisplayName":
+    {
+      "value": "Receive 856 RMA"
+    },
+    "wsoSubscriptionName":
+    {
+      "value": "Receive_940_WSO"
+    },
+    "wsoSubscriptionDisplayName":
+    {
+      "value": "Receive 940 WSO"
+    },
+    "testSubscriptionName":
+    {
+      "value": "test"
+    },
+    "testSubscriptionDisplayName":
+    {
+      "value": "Test"
+    }
+  }
+}

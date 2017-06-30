@@ -1,0 +1,89 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "type": "string"
+    },
+    "eventHubNamespaceName": {
+      "type": "string"
+    },
+    "eventHubName1": {
+      "type": "string"
+    },
+    "consumerGroupName1": {
+      "type": "string"
+    },
+    "sasPolicyReporting": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "eventHubNamespaceName": "[concat(toLower(parameters('environment')),'-', parameters('eventHubNamespaceName'))]",
+    "defaultSASKeyName": "RootManageSharedAccessKey",
+    "authRuleResourceId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', variables('eventHubNamespaceName'), variables('defaultSASKeyName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[variables('eventHubNamespaceName')]",
+      "type": "Microsoft.EventHub/Namespaces",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "[parameters('eventHubName1')]",
+          "type": "EventHubs",
+          "dependsOn": [
+            "[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaceName'))]"
+          ],
+          "properties": {
+            "path": "[variables('eventHubNamespaceName')]"
+          },
+          "resources": [
+            {
+              "apiVersion": "2015-08-01",
+              "name": "[parameters('consumerGroupName1')]",
+              "type": "ConsumerGroups",
+              "dependsOn": [
+                "[parameters('eventHubName1')]"
+              ],
+              "properties": {
+
+              }
+            }
+          ]
+        },
+        {
+          "type": "AuthorizationRules",
+          "name": "[parameters('sasPolicyReporting')]",
+          "apiVersion": "2015-08-01",
+          "properties": {
+            "rights": [
+              "Manage",
+              "Send",
+              "Listen"
+            ]
+          },
+          "dependsOn": [
+            "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubNamespaceName'))]"
+          ]
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "NamespaceConnectionString": {
+      "type": "string",
+      "value": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryConnectionString]"
+    },
+    "SharedAccessPolicyPrimaryKey": {
+      "type": "string",
+      "value": "[listkeys(variables('authRuleResourceId'), '2015-08-01').primaryKey]"
+    }
+  }
+}

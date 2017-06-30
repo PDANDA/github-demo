@@ -1,0 +1,39 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters":
+  {
+    "environmentName":
+    {
+      "value": "UAT"
+    },
+    "serviceBusNamespaceName":
+    {
+      "value": "SB-Common"
+    },
+    "topicName":
+    {
+      "value": "publish-belkinx12-incoming"
+    },
+    "topicDisplayName":
+    {
+      "value": "Publish Belkin X12 Incoming"
+    },
+    "publishSubscriptionName":
+    {
+      "value": "publish"
+    },
+    "publishSubscriptionDisplayName":
+    {
+      "value": "Publish"
+    },
+    "testSubscriptionName":
+    {
+      "value": "test"
+    },
+    "testSubscriptionDisplayName":
+    {
+      "value": "Test"
+    }
+  }
+}

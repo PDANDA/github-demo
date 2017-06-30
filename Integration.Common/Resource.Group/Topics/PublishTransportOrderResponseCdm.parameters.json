@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "DEV"
+    },
+    "serviceBusNamespaceName": {
+      "value": "sb-common"
+    },
+    "topicName": {
+      "value": "publish-transportorderresponse-cdm"
+    },
+    "topicDisplayName": {
+      "value": "Publish Transport Order Response CDM"
+    },
+    "publishSubscriptionName": {
+      "value": "publish"
+    },
+    "publishSubscriptionDisplayName": {
+      "value": "Publish"
+    },
+    "testSubscriptionName": {
+      "value": "test"
+    },
+    "testSubscriptionDisplayName": {
+      "value": "Test"
+    }
+  }
+}

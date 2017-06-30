@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
+  <TemplateData>
+    <Name>Logic App Blob Connector</Name>
+    <Description>Logic App Blob Connector</Description>
+    <Icon>__TemplateIcon.jpg</Icon>
+    <!--<PreviewImage>__PreviewImage.jpg</PreviewImage>-->
+    <ProjectType>CSharp</ProjectType>
+    <ProjectSubType>Cloud</ProjectSubType>
+    <SortOrder>10</SortOrder>
+    <TemplateID>007fae8b-6151-4abf-a663-96b2dbb8ac59</TemplateID>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>Logic.App.Connectors.BlobConnector</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="Logic.App.Connectors.BlobConnector.csproj"
+             File="ProjectTemplate.csproj"
+             ReplaceParameters="true">
+      <Folder Name="App_Data"
+              TargetFolderName="App_Data" />
+      <Folder Name="App_Start"
+              TargetFolderName="App_Start">
+        <ProjectItem ReplaceParameters="true"
+                     TargetFileName="SwaggerConfig.cs">SwaggerConfig.cs</ProjectItem>
+        <ProjectItem ReplaceParameters="true"
+                     TargetFileName="WebApiConfig.cs">WebApiConfig.cs</ProjectItem>
+      </Folder>
+      <Folder Name="Controllers"
+              TargetFolderName="Controllers">
+        <ProjectItem ReplaceParameters="true"
+                     TargetFileName="BlobController.cs">BlobController.cs</ProjectItem>
+      </Folder>
+      <ProjectItem ReplaceParameters="true"
+                   TargetFileName="Global.asax">Global.asax</ProjectItem>
+      <ProjectItem ReplaceParameters="true"
+                   TargetFileName="Global.asax.cs">Global.asax.cs</ProjectItem>
+      <Folder Name="Models"
+              TargetFolderName="Models">
+        <ProjectItem ReplaceParameters="true"
+                     TargetFileName="Message.cs">Message.cs</ProjectItem>
+      </Folder>
+      <ProjectItem ReplaceParameters="true"
+                   TargetFileName="packages.config">packages.config</ProjectItem>
+      <Folder Name="Properties"
+              TargetFolderName="Properties">
+        <ProjectItem ReplaceParameters="true"
+                     TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+        <Folder Name="PublishProfiles"
+                TargetFolderName="PublishProfiles" />
+      </Folder>
+      <ProjectItem ReplaceParameters="true"
+                   TargetFileName="Web.config">Web.config</ProjectItem>
+      <ProjectItem ReplaceParameters="true"
+                   TargetFileName="Web.Debug.config">Web.Debug.config</ProjectItem>
+      <ProjectItem ReplaceParameters="true"
+                   TargetFileName="Web.Release.config">Web.Release.config</ProjectItem>
+    </Project>
+  </TemplateContent>
+  <WizardExtension>
+    <Assembly>NuGet.VisualStudio.Interop, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Assembly>
+    <FullClassName>NuGet.VisualStudio.TemplateWizard</FullClassName>
+  </WizardExtension>
+  <WizardData>
+    <packages>
+      <package id="Interprit.LogicAppConnectors.BlobConnector"
+               version="Interprit.LogicAppConnectors.BlobConnector"
+               targetFramework="net452" />
+      <package id="Microsoft.AspNet.WebApi"
+               version="5.2.3"
+               targetFramework="net452" />
+      <package id="Microsoft.AspNet.WebApi.Client"
+               version="5.2.3"
+               targetFramework="net452" />
+      <package id="Microsoft.AspNet.WebApi.Core"
+               version="5.2.3"
+               targetFramework="net452" />
+      <package id="Microsoft.AspNet.WebApi.WebHost"
+               version="5.2.3"
+               targetFramework="net452" />
+      <package id="Microsoft.Azure.KeyVault.Core"
+               version="1.0.0"
+               targetFramework="net452" />
+      <package id="Microsoft.Data.Edm"
+               version="5.6.4"
+               targetFramework="net452" />
+      <package id="Microsoft.Data.OData"
+               version="5.6.4"
+               targetFramework="net452" />
+      <package id="Microsoft.Data.Services.Client"
+               version="5.6.4"
+               targetFramework="net452" />
+      <package id="Microsoft.Web.Infrastructure"
+               version="1.0.0.0"
+               targetFramework="net452" />
+      <package id="Microsoft.WindowsAzure.ConfigurationManager"
+               version="3.2.1"
+               targetFramework="net452" />
+      <package id="Newtonsoft.Json"
+               version="6.0.8"
+               targetFramework="net452" />
+      <package id="Swashbuckle"
+               version="5.0.0"
+               targetFramework="net452" />
+      <package id="Swashbuckle.Core"
+               version="5.0.0"
+               targetFramework="net452" />
+      <package id="System.IdentityModel.Tokens.Jwt"
+               version="4.0.0"
+               targetFramework="net452" />
+      <package id="System.Spatial"
+               version="5.6.4"
+               targetFramework="net452" />
+      <package id="WebActivatorEx"
+               version="2.0.6"
+               targetFramework="net452" />
+      <package id="WindowsAzure.Storage"
+               version="7.2.0"
+               targetFramework="net452" />
+    </packages>
+  </WizardData>
+</VSTemplate>

@@ -1,0 +1,39 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "DEV"
+    },
+    "commonEnvironment": {
+      "value": "DEV"
+    },
+    "logicAppName": {
+      "value": "LA-Decode-BelkinX12"
+    },
+    "apiBlobConnectorAppName": {
+      "value": "AS-AS2-EDI-Belkin-Blob"
+    },
+    "adAuthAudienceReport": {
+      "value": "6c1ce224-d037-4875-ae59-7073ee0c9ba2"
+    },
+    "adAuthAudienceBlob": {
+      "value": "882793f3-fd11-4af2-ba16-d91e2fd6bf4e"
+    },
+    "adAuthAuthority": {
+      "value": "https://login.windows.net"
+    },
+    "adAuthClientId": {
+      "value": "606f3642-0649-4187-a6d2-eb93248f1768"
+    },
+    "adAuthSecret": {
+      "value": "rozAlmECPOLdsDpfyBJNFE3oSdhLDlvG+3Km7tUIKDk="
+    },
+    "adAuthTenant": {
+      "value": "linfox.onmicrosoft.com"
+    },
+    "interfaceName": {
+      "value": "BelkinAS2EDI"
+    }
+  }
+}

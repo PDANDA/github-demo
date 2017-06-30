@@ -1,0 +1,19 @@
+C:\interprit\interfaces\Interface.Post.Goods.Receipt.PWS.To.CDM\Interface.Linfox.PGR.PWSToCDM.Tests\Integration.Account\Maps\PWS.PostGoodsReceipt-To-CDM.PostGoodsReceipt.xslt
+C:\interprit\interfaces\Interface.Post.Goods.Receipt.PWS.To.CDM\Integration.Account\Maps\PWS.PostGoodsReceipt-To-CDM.PostGoodsReceipt.xslt
+
+customArg:sbConfig="sdfsdf" 
+
+
+XmlFileName("sfds")
+XmlString()
+XmlGetXml() 
+
+CustomTestArgs = Map<string, string>
+
+
+getCustomArgs = 
+
+removeCustomArgs
+
+
+TestListArgs

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Interprit.LogicAppConnectors.BlobConnector</id>
+    <version>1.0.1</version>
+    <title>Interprit Logic App Blob Connector</title>
+    <authors>Interprit</authors>
+    <owners>Interprit</owners>
+    <description>
+      This package is a complete update to the Interprit Logic App Blob Connector. When installed, it will update an ASP.NET project's content files and referenced assemblies required to support the Logic App Blob Connector.
+    </description>
+    <releaseNotes>
+    </releaseNotes>
+    <summary>
+      Supports blob operations from Logic Apps.
+    </summary>
+    <language>en-US</language>
+    <projectUrl>https://interprit.com/packages/Logic.App.Connectors.BlobConnector.NuGet.Packager</projectUrl>
+    <iconUrl>http://interprit.com/Media/Default/logo/InterpritLogo_WhiteLetters_TransparaentBG_height30-1.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>http://interprit.com</licenseUrl>
+    <copyright>Copyright Interprit 2017</copyright>
+    <dependencies>
+      <group targetFramework="net40">
+        <dependency id="log4net"
+                    version="1.2.10" />
+      </group>
+    </dependencies>
+    <references></references>
+    <tags></tags>
+  </metadata>
+  <files>
+    <!--  <file src="lib\" target="lib" /> -->
+    <file src="tools\" target="tools" />
+    <file src="content\" target="content" />
+  </files>
+</package>

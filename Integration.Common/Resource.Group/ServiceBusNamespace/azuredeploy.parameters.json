@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters":
+  {
+    "environment":
+    {
+      "value": "DEV"
+    },
+    "serviceBusNamespaceName":
+    {
+      "value": "lfxtierchangetest001"
+    },
+    "servicebusTier":
+    {
+      "value": "Premium"
+    },
+    "primaryKey":
+    {
+      "value": "H4efJQFSFTzmV90OwqVOsxTJHx40CKA7IfJVxGQ12W0="
+    },
+    "secondaryKey":
+    {
+      "value": "Lhf5Sl7yE5b0oufE+C7bmAiiCfGXpXU8xEkaI3kPsyk="
+    }
+  }
+}

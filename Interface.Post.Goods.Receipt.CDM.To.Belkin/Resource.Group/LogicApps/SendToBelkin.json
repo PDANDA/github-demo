@@ -1,0 +1,223 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "type": "string"
+    },
+    "commonEnvironment": {
+      "type": "string"
+    },
+    "logicAppName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    },
+    "logicAppLocation": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "allowedValues": [
+        "eastasia",
+        "southeastasia",
+        "centralus",
+        "eastus",
+        "eastus2",
+        "westus",
+        "northcentralus",
+        "southcentralus",
+        "northeurope",
+        "westeurope",
+        "japanwest",
+        "japaneast",
+        "brazilsouth",
+        "australiaeast",
+        "australiasoutheast",
+        "westcentralus",
+        "westus2",
+        "[resourceGroup().location]"
+      ],
+      "metadata": {
+        "description": "Location of the Logic App."
+      }
+    },
+    "servicebusConnectionName": {
+      "type": "string",
+      "defaultValue": "APIConn-ServiceBus"
+    },
+    "servicebusConnectionDisplayName": {
+      "type": "string",
+      "defaultValue": "ServiceBus Connection"
+    },
+    "serviceBusNamespaceName": {
+      "type": "string",
+      "defaultValue": "Sb-Common"
+    },
+    "commonResourceGroupName": {
+      "type": "string",
+      "defaultValue": "DEv-Integration-Common"
+    },
+    "apiBlobConnectorAppName": {
+      "type": "string",
+      "defaultValue": "DEV-API-PostGoodsReceipt-CDMToBelkin-Archive"
+    },
+    "apiReportingConnectorAppName": {
+      "type": "string",
+      "defaultValue": "DEV-API-PostGoodsReceipt-CDMToBelkin-Report"
+    },
+    "eventHubName": {
+      "type": "string",
+      "defaultValue": "eh-common"
+    },
+    "eventHubRuleId": {
+      "type": "string",
+      "defaultValue": "Reporting"
+    }
+  },
+  "variables": {
+    "archiveAndReportingUri": "[concat('https://',parameters('environmentName'), '-',parameters('apiReportingConnectorAppName'), '.azurewebsites.net')]",
+    "blobStorageUri": "[concat('https://',parameters('environmentName'), '-', parameters('apiBlobConnectorAppName'), '.azurewebsites.net')]",
+    "serviceBusNamespaceauthRuleResourceId": "[resourceId(concat(parameters('commonEnvironment'), '-',parameters('commonResourceGroupName')),'Microsoft.ServiceBus/namespaces/authorizationRules', concat(parameters('environmentName'), '-',parameters('serviceBusNamespaceName')), 'RootManageSharedAccessKey')]",
+    "eventHubName": "[concat(parameters('environment'), '-', parameters('eventHubName'))]",
+    "eventHubResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('commonResourceGroupName'), '/providers/Microsoft.EventHub/namespaces/', variables('eventHubName'))]"
+  },
+  "resources": [
+    {
+      "name": "[concat(parameters('environmentName'), '-',parameters('logicAppName'))]",
+      "type": "Microsoft.Logic/workflows",
+      "location": "[parameters('logicAppLocation')]",
+      "apiVersion": "2016-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', parameters('servicebusConnectionName'))]"
+      ],
+      "tags": {
+        "displayName": "logicApp"
+      },
+      "properties": {
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "actions": {
+            "Complete_the_message_in_a_topic_subscription": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "api": {
+                    "runtimeUrl": "https://logic-apis-australiasoutheast.azure-apim.net/apim/servicebus"
+                  },
+                  "connection": {
+                    "name": "@parameters('$connections')['servicebus']['connectionId']"
+                  }
+                },
+                "method": "delete",
+                "path": "/@{encodeURIComponent('postgoodsreceipt_belkin')}/subscriptions/@{encodeURIComponent('postgoodsreceipt_belkin_sub')}/messages/complete",
+                "queries": {
+                  "lockToken": "@{triggerBody()['LockToken']}",
+                  "subscriptionType": "Main"
+                }
+              },
+              "runAfter": {}
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "When_a_message_is_received_in_a_topic_subscription_(peek-lock)": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "api": {
+                    "runtimeUrl": "https://logic-apis-australiasoutheast.azure-apim.net/apim/servicebus"
+                  },
+                  "connection": {
+                    "name": "@parameters('$connections')['servicebus']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/@{encodeURIComponent('postgoodsreceipt_belkin')}/subscriptions/@{encodeURIComponent('postgoodsreceipt_belkin_sub')}/messages/head/peek",
+                "queries": {
+                  "subscriptionType": "Main"
+                }
+              },
+              "recurrence": {
+                "frequency": "Minute",
+                "interval": 3
+              }
+            }
+          },
+          "contentVersion": "1.0.0.0",
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "servicebus": {
+                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', parameters('logicAppLocation'), '/managedApis/', 'servicebus')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('servicebusConnectionName'))]",
+                "connectionName": "[parameters('servicebusConnectionName')]"
+              }
+            }
+          }
+        }
+      },
+      "resources": [
+        {
+          "type": "providers/diagnosticSettings",
+          "name": "Microsoft.Insights/service",
+          "dependsOn": [
+            "[resourceId('Microsoft.Logic/workflows', variables('logicAppName'))]"
+          ],
+          "apiVersion": "2015-07-01",
+          "properties": {
+            "serviceBusResourceId": "[variables('eventHubResourceId')]",
+            "serviceBusRuleId": "[concat(variables('eventHubResourceId'), '/authorizationrules/', parameters('eventHubRuleId'))]",
+            "logs": [
+              {
+                "category": "WorkflowRuntime",
+                "enabled": true,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              }
+            ],
+            "metrics": [
+              {
+                "timeGrain": "PT1M",
+                "enabled": true,
+                "retentionPolicy": {
+                  "enabled": true,
+                  "days": 1
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('servicebusConnectionName')]",
+      "tags": {
+        "displayName": "servicebusConnection"
+      },
+      "location": "[parameters('logicAppLocation')]",
+      "properties": {
+        "api": {
+          "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', parameters('logicAppLocation'), '/managedApis/', 'servicebus')]"
+        },
+        "displayName": "[parameters('servicebusConnectionDisplayName')]",
+        "parameterValues": {
+          "connectionString": "[listkeys(variables('serviceBusNamespaceauthRuleResourceId'), '2015-08-01').primaryConnectionString]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
